@@ -12,7 +12,7 @@ include_directories(
 macro(add_rhi_unittest TARGET_NAME)
     if(ANDROID)
         add_android_app(${TARGET_NAME}
-            SRCS ${ARGN} ${Kaleido3D_SOURCE_DIR}/Platform/Android/jni/RendererView.cpp ${Kaleido3D_SOURCE_DIR}/Source/Platform/Android/jni/RendererView_JNI.cpp
+            SRCS ${ARGN} ${Kaleido3D_SOURCE_DIR}/Source/Platform/Android/jni/RendererView.cpp ${Kaleido3D_SOURCE_DIR}/Source/Platform/Android/jni/RendererView_JNI.cpp
             LIBS ${PLATFORM_LIBS} Kaleido3D.Core)
     elseif(WIN32)
         add_executable(${TARGET_NAME} ${ARGN} ${Kaleido3D_SOURCE_DIR}/Source/Platform/Microsoft/Win32/win32icon.rc)

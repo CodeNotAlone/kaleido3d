@@ -1,6 +1,6 @@
 #pragma once
 
-#include <KTL/Archive.hpp>
+#include <Core/KTL/Archive.hpp>
 
 namespace k3d
 {
@@ -46,7 +46,7 @@ namespace k3d
 	class CameraData;
 	class ShaderData;
 
-	class K3D_API AssetBundle
+	class K3D_CORE_API AssetBundle
 	{
 	public:
 		static AssetBundle * CreateBundle(const char * bundleName, const char * bundleDir);

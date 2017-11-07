@@ -31,12 +31,14 @@ else()
    	message(STATUS "have to download third_party....")
 	execute_process(COMMAND 
 		${PYTHON_EXECUTABLE} 
-		${Kaleido3D_SOURCE_DIR}/Tools/Build/get_dependencies.py
-		${K3D_DEPENDS_PATH}
+		${Kaleido3D_SOURCE_DIR}/Tools/GetThirdParty.py
+		--output_dir ${K3D_DEPENDS_PATH} --target_os=${K3D_TARGET_SYSTEM}
 	)
 endif()
 
 include(${K3D_DEPENDS_PATH}/lib/cmake/third_party.cmake)
+include(${K3D_DEPENDS_PATH}/third_party_clibs.cmake)
+include(${K3D_DEPENDS_PATH}/grpc.cmake)
 #find_package(ThirdParty)
 find_package(LibClang)
 find_package(PythonInterp)
@@ -46,9 +48,11 @@ option(BUILD_WITH_EDITOR "Build With Editor" OFF)
 #option(BUILD_WITH_CPP_REFLECTOR "Build with CppReflector" OFF)
 option(BUILD_WITH_D3D12 "Build With D3D12 RHI" OFF)
 option(BUILD_WITH_V8 "Build With V8 Script Module" OFF)
+option(BUILD_WITH_OPENSSL "With OpenSSL Support" ON)
 option(BUILD_WITH_UNIT_TEST "Build With Unit Test" ON)
 #option(BUILD_NGFX "Build NGFX Standalone Library" OFF)
 option(ENABLE_SHAREDPTR_TRACK "Enable SharedPtr Track" OFF)
+option(BUILD_MOBILE_TOOLS "Build Mobile Tools" ON)
 
 if(IOS OR MACOS)
 	set(LIB_DIR @loader_path/../Frameworks)
@@ -80,7 +84,7 @@ endif()
 message(STATUS "compiler is ${CMAKE_CXX_COMPILER_ID}" ) 
 ## C++ 14 Support
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-attributes -fexceptions -pthread -std=c++14")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-attributes -Wno-c++11-narrowing -fexceptions -pthread -std=c++14")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O2")
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
@@ -118,6 +122,13 @@ if(ANDROID)
     add_definitions(-DK3DPLATFORM_OS_ANDROID=1)
 endif()
 
+
+if(ANDROID OR IOS)
+    add_definitions(-DK3D_USE_NEON=1)
+else()
+    add_definitions(-DK3D_USE_SSE=1)
+endif()
+
 include_directories(
 	Source
 	Include
@@ -151,12 +162,14 @@ Project/FindThirdParty.cmake
 Project/Platform.cmake
 )
 
+include_directories(Source)
+
 add_subdirectory(Source/Core)
-add_subdirectory(Source/Log)
-add_subdirectory(Source/Renderer)
+#add_subdirectory(Source/Log)
+#add_subdirectory(Source/Renderer)
 #add_subdirectory(Source/Engine)
-add_subdirectory(Source/RHI)
-add_subdirectory(Source/ShaderCompiler)
+#add_subdirectory(Source/RHI)
+#add_subdirectory(Source/ShaderCompiler)
 
 if(PY_YAML_FOUND)
 	message(STATUS "NGFX Will Be Built")
@@ -165,27 +178,39 @@ endif()
 
 #if(BUILD_WITH_V8)
 	if(NOT (ANDROID OR MACOS))
-		add_subdirectory(Source/Script)
+#		add_subdirectory(Source/Script)
 	endif()
 #endif()
 
+#add_subdirectory(Source/Network)
+
 if(MAYA_FOUND)
-	add_subdirectory(Tools/MayaDCC)
+#	add_subdirectory(Tools/MayaDCC)
 endif()
 
 if(LibClang_FOUND)
 	message(STATUS "libclang found, cpp_reflector will be built!")
-	add_subdirectory(Tools/CppReflector)
+#	add_subdirectory(Tools/CppReflector)
 endif(LibClang_FOUND)
+
+
+if(Qt5_DIR)
+	find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+endif()
 
 if(BUILD_WITH_EDITOR AND (NOT Qt5_FOUND))
 	set(CMAKE_AUTOMOC ON)
 	set(CMAKE_AUTOUIC ON)
 	set(CMAKE_INCLUDE_CURRENT_DIR ON)
-	set(Qt5_DIR "C:/Usr/bin/Qt5.8.0/lib/cmake/Qt5")
 	find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 endif()
 
 if(Qt5_FOUND)
-	add_subdirectory(Tools/Editor)
+	message(STATUS "Qt5 Found")
+#	add_subdirectory(Tools/Editor)
 endif(Qt5_FOUND)
+
+if(BUILD_MOBILE_TOOLS AND WIN32)
+    message(STATUS "Build With Mobile Tools")
+    add_subdirectory(Tools/Mobile)
+endif()

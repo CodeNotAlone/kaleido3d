@@ -1,5 +1,4 @@
 #pragma once
-#include "../../../Core/InputDevice.h"
 
 namespace k3d 
 {

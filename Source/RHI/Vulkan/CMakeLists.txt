@@ -1,6 +1,6 @@
 file(GLOB VKRHI_SRC_LIST "*.cpp" "*.h")
 include_directories(
-../.. ../../../Include
+../..
 .
 )
 
@@ -17,8 +17,8 @@ set(RHI_HEADERS
 )
 
 set(NGFX_HEADERS
-	../../../Include/Interface/IRHI.h
-	../../../Include/Interface/NGFX.h
+	../../Core/Interface/IRHI.h
+	../../Core/Interface/NGFX.h
 )
 
 set(RHI_IMPL_SRCS

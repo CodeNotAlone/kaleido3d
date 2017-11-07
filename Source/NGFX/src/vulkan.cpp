@@ -1,6 +1,4 @@
-#include <Kaleido3D.h>
-#include <KTL/Allocator.hpp>
-#include <Core/Os.h>
+#include <Core/CoreMinimal.h>
 #include <spirv_cross/spirv_cross.hpp>
 
 #if K3DCOMPILER_MSVC
@@ -24,8 +22,8 @@
 using namespace ngfx;
 using namespace std;
 
-using Os::File;
-using Os::MemMapFile;
+using k3d::os::File;
+using k3d::os::MemMapFile;
 
 #define VULKAN_ALLOCATOR nullptr
 
@@ -334,7 +332,7 @@ VkShaderStageFlagBits ConvertShaderTypeToVulkanEnum(ShaderType const& e) {
     case ShaderType::Geometry:
         return VK_SHADER_STAGE_GEOMETRY_BIT;
     case ShaderType::TessailationEval:
-        return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
     case ShaderType::TessailationControl:
         return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
     }
@@ -715,24 +713,24 @@ namespace spirv_cross
             auto active = m_Reflector->get_active_interface_variables();
             for (auto& res : shRes.uniform_buffers)
             {
-                const uint64 kBlockMask = (1ULL << spv::DecorationBlock) | (1ULL << spv::DecorationBufferBlock);
+                const k3d::U64 kBlockMask = (1ULL << spv::DecorationBlock) | (1ULL << spv::DecorationBufferBlock);
                 auto&    typeInfo = m_Reflector->get_type(res.type_id);
                 bool     isPushConstant = (spv::StorageClassPushConstant == m_Reflector->get_storage_class(res.id));
                 bool     isBlock = (0 != (m_Reflector->get_decoration_mask(typeInfo.self) & kBlockMask));
-                //uint32 	 typeId = ((!isPushConstant && isBlock) ? res.type_id : res.id);
+                //k3d::U32 	 typeId = ((!isPushConstant && isBlock) ? res.type_id : res.id);
 
                 //auto            bindingType = isPushConstant ? NGFX_SHADER_BIND_CONSTANTS : NGFX_SHADER_BIND_BLOCK;
                 std::string     bindingName = m_Reflector->get_name(res.id);
-                //uint32			bindingNumber = m_Reflector->get_decoration(res.id, spv::DecorationBinding);
-                //uint32			bindingSet = m_Reflector->get_decoration(res.id, spv::DecorationDescriptorSet);
+                //k3d::U32			bindingNumber = m_Reflector->get_decoration(res.id, spv::DecorationBinding);
+                //k3d::U32			bindingSet = m_Reflector->get_decoration(res.id, spv::DecorationDescriptorSet);
                 //NGFXShaderType  bindingStage = shaderType;
 
-                for (uint32 index = 0; index < typeInfo.member_types.size(); ++index) {
+                for (k3d::U32 index = 0; index < typeInfo.member_types.size(); ++index) {
                     std::string memberName = m_Reflector->get_member_name(res.type_id, index);
-                    uint32      memberId = typeInfo.member_types[index];
+                    k3d::U32      memberId = typeInfo.member_types[index];
                     auto&		memberTypeInfo = m_Reflector->get_type(memberId);
-                    uint32      memberOffset = m_Reflector->get_member_decoration(res.type_id, index, spv::DecorationOffset);
-                    uint32      memberArraySize = memberTypeInfo.array.empty() ? 1 : memberTypeInfo.array[0];
+                    k3d::U32      memberOffset = m_Reflector->get_member_decoration(res.type_id, index, spv::DecorationOffset);
+                    k3d::U32      memberArraySize = memberTypeInfo.array.empty() ? 1 : memberTypeInfo.array[0];
                     //NGFXShaderDataType	memberDataType = spirTypeToGlslUniformDataType(memberTypeInfo);
 
                     std::string uniformName = bindingName + "." + memberName;
@@ -928,13 +926,13 @@ class VulkanLibrary1 : public ngfx::Library
 {
     friend class VulkanFunction1;
 public:
-    VulkanLibrary1(VulkanDevice* pDevice, const void *pBlobData, uint64 Size);
+    VulkanLibrary1(VulkanDevice* pDevice, const void *pBlobData, k3d::U64 Size);
     VulkanLibrary1(VulkanDevice* pDevice, const char *pFilePath);
     ~VulkanLibrary1() override;
 
     Result MakeFunction(const char * name, Function ** ppFunction) override;
 protected:
-    void Init(const void *pBlobData, uint64 Size);
+    void Init(const void *pBlobData, k3d::U64 Size);
 
 private:
     FunctionMap DataBlob;
@@ -1109,7 +1107,7 @@ protected:
 
     typename PipelineTrait<T>::CreateInfo Info;
 
-    VkResult CreatePipelineCache(void const* InData, uint64 InSize)
+    VkResult CreatePipelineCache(void const* InData, k3d::U64 InSize)
     {
         VkPipelineCacheCreateInfo CacheInfo = { VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO, nullptr, 0, InSize, InData };
         return vkCreatePipelineCache(OwningDevice->Handle, &CacheInfo, VULKAN_ALLOCATOR, &Cache);
@@ -1120,7 +1118,7 @@ protected:
         return PipelineTrait<T>::Create(OwningDevice->Handle, Cache, 1, &Info, VULKAN_ALLOCATOR, &Handle);
     }
 
-    VkResult RetrieveCache(void* OutData, uint64* OutSize)
+    VkResult RetrieveCache(void* OutData, k3d::U64* OutSize)
     {
         if (Cache)
         {
@@ -1929,7 +1927,7 @@ VulkanDevice::VulkanDevice(VulkanFactory* pFactory, VkPhysicalDevice PhysicalDev
 {
     OwningRoot->AddInternalRef();
 
-    uint32 queueCount = 0;
+    k3d::U32 queueCount = 0;
     std::vector<VkQueueFamilyProperties> QueueFamilyProps;
     vkGetPhysicalDeviceQueueFamilyProperties(PhysicalDevice, &queueCount, NULL);
     QueueFamilyProps.resize(queueCount);
@@ -1943,7 +1941,7 @@ VulkanDevice::VulkanDevice(VulkanFactory* pFactory, VkPhysicalDevice PhysicalDev
     // Async Compute & Transfer
     uint32_t GfxQueueId = 0;
     uint32_t CptQueueId = 0;
-    for (uint32 Id = 0; Id < queueCount; Id++)
+    for (k3d::U32 Id = 0; Id < queueCount; Id++)
     {
         QueueInfos[Id].Family = Id;
         QueueInfos[Id].Flags = QueueFamilyProps[Id].queueFlags;
@@ -2396,7 +2394,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanDevice * pDevice, const RenderPassDesc 
     attachments.resize(Info.attachmentCount);
     memset(attachments.data(), 0, Info.attachmentCount * sizeof(VkAttachmentDescription));
 
-    uint32 colorId = 0;
+    k3d::U32 colorId = 0;
 
     for (int i = 0; i < pDesc->colorAttachmentsCount; i++)
     {
@@ -3338,7 +3336,7 @@ void VulkanComputeEncoder::Dispatch(uint32_t x, uint32_t y, uint32_t z)
     vkCmdDispatch(OwningCommand->Handle, x, y, z);
 }
 
-VulkanLibrary1::VulkanLibrary1(VulkanDevice * pDevice, const void * pBlobData, uint64 Size)
+VulkanLibrary1::VulkanLibrary1(VulkanDevice * pDevice, const void * pBlobData, k3d::U64 Size)
     : Device(pDevice)
 {
     Device->AddInternalRef();
@@ -3350,14 +3348,14 @@ VulkanLibrary1::VulkanLibrary1(VulkanDevice * pDevice, const char * pFilePath)
 {
     Device->AddInternalRef();
     MemMapFile MemFile;
-    if (MemFile.Open(pFilePath, IORead))
+    if (MemFile.Open(pFilePath, k3d::IOFlag::Read))
     {
         Init(MemFile.FileData(), MemFile.GetSize());
         MemFile.Close();
     }
 }
 
-void VulkanLibrary1::Init(const void * pBlobData, uint64 Size)
+void VulkanLibrary1::Init(const void * pBlobData, k3d::U64 Size)
 {
     const char* pHead = reinterpret_cast<const char*>(pBlobData);
     // parse binary

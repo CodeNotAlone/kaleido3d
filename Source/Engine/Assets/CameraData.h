@@ -20,7 +20,7 @@ namespace k3d
 		ECamVersion     Version;
 	};
 
-	class K3D_API CameraData
+	class K3D_CORE_API CameraData
 	{
 	public:
 		CameraData();
@@ -31,8 +31,8 @@ namespace k3d
 
 		KOBJECT_CLASSNAME(CameraData)
 
-		friend K3D_API class Archive& operator << (class Archive & arch, const CameraData & mesh);
-		friend K3D_API class Archive& operator >> (class Archive & arch, CameraData & mesh);
+		friend K3D_CORE_API class Archive& operator << (class Archive & arch, const CameraData & mesh);
+		friend K3D_CORE_API class Archive& operator >> (class Archive & arch, CameraData & mesh);
 
 		KOBJECT_PROPERTY_IMPL(Position, kMath::Vec3f);
 		KOBJECT_PROPERTY_IMPL(UpVector, kMath::Vec3f);

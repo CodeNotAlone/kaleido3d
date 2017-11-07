@@ -2,9 +2,10 @@
 #define __k3dMesh_h__
 #pragma once
 
-#include <Math/kMath.hpp>
-#include <Math/kGeometry.hpp>
-#include <Interface/IMesh.h>
+#include <Core/Math/kMath.hpp>
+#include <Core/Math/kGeometry.hpp>
+#include <Core/Interface/IMesh.h>
+#include <Core/KTL/SharedPtr.hpp>
 #include <sstream>
 
 #include "Bundle.h"
@@ -71,7 +72,7 @@ namespace k3d
 	};
 
 
-	class K3D_API MeshData : public IMesh {
+	class K3D_CORE_API MeshData : public IMesh {
 	public:
 
 		MeshData();
@@ -124,8 +125,8 @@ namespace k3d
 
 		friend class AssetManager;
 
-		friend K3D_API class Archive& operator << (class Archive & arch, const MeshData & mesh);
-		friend K3D_API class Archive& operator >> (class Archive & arch, MeshData & mesh);
+		friend K3D_CORE_API class Archive& operator << (class Archive & arch, const MeshData & mesh);
+		friend K3D_CORE_API class Archive& operator >> (class Archive & arch, MeshData & mesh);
 
 	public:
 

@@ -12,7 +12,7 @@ namespace render
 
 	class RenderContext;
 
-	class K3D_API Renderable
+	class K3D_CORE_API Renderable
 	{
 	public:
 		Renderable();
@@ -24,7 +24,7 @@ namespace render
 		kMath::Mat4f	m_ModelMatrix;
 	};
 
-	class K3D_API RenderableMesh : public Renderable
+	class K3D_CORE_API RenderableMesh : public Renderable
 	{
 	public:
 		RenderableMesh();
@@ -45,7 +45,7 @@ namespace render
 	/**
 	* Associated with RHI
 	*/
-	class K3D_API RenderContext
+	class K3D_CORE_API RenderContext
 	{
 	public:
 		RenderContext();

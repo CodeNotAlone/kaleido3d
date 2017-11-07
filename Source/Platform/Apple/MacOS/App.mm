@@ -1,7 +1,4 @@
-#include "Kaleido3D.h"
-#include <Core/App.h>
-#include <Core/AssetManager.h>
-#include <KTL/String.hpp>
+#include "CoreMinimal.h"
 
 @implementation AppDelegate
 - (BOOL)application:(NSNotification*)notification didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
@@ -59,7 +56,7 @@ namespace k3d {
       [path release];
       path = [[NSString alloc] initWithString:[bundle executablePath]];
       String exePath = [path UTF8String];
-      auto sepPos = exePath.FindLastOf('/');
+      auto sepPos = exePath.FindLastOf("/");
       AppName = exePath.SubStr(sepPos+1, exePath.Length()-sepPos);
       [path release];
     }

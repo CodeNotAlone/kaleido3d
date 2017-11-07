@@ -1,7 +1,6 @@
 #include <Core/App.h>
 #include <Core/Message.h>
-#include <Interface/IRHI.h>
-#include <Kaleido3D.h>
+#include <Core/Interface/IRHI.h>
 #if K3DPLATFORM_OS_WIN
 #include <RHI/Vulkan/Public/IVkRHI.h>
 #include <RHI/Vulkan/VkCommon.h>

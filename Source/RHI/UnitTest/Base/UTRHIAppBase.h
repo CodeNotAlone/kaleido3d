@@ -1,13 +1,13 @@
 #ifndef __UTRHIBaseApp_h__
 #define __UTRHIBaseApp_h__
 
-#include <Kaleido3D.h>
+#include <Core/Kaleido3D.h>
 #include <Core/App.h>
 #include <Core/AssetManager.h>
 #include <Core/LogUtil.h>
 #include <Core/Os.h>
 #include <Core/Message.h>
-#include <Interface/IRHI.h>
+#include <Core/Interface/IRHI.h>
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
 #include <thread>

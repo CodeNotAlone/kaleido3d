@@ -1,4 +1,4 @@
-#include "Kaleido3D.h"
+#include <Core/Kaleido3D.h>
 #include "V8Binding.h"
 #include <Core/LogUtil.h>
 #include <Core/AssetManager.h>

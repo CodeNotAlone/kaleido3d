@@ -1,6 +1,5 @@
-#include <Kaleido3D.h>
+#include <Core/CoreMinimal.h>
 #include "vulkan_glslang.h"
-#include <Core/Os.h>
 #include <iostream>
 #include <unordered_map>
 
@@ -80,13 +79,13 @@ int main(int argc, const char* argv[])
   FunctionMap DataBlob;
   std::string Error;
 
-  Os::File SrcFile;
-  if(!SrcFile.Open(Util.GetArg("-c").c_str(), IORead))
+  k3d::os::File SrcFile;
+  if(!SrcFile.Open(Util.GetArg("-c").c_str(), k3d::IOFlag::Read))
   {
     cerr << "Unable To Open File: " << Util.GetArg("-c").c_str() << endl;
     return -1;
   }
-  uint64 SzFile = SrcFile.GetSize();
+  k3d::U64 SzFile = SrcFile.GetSize();
   char* SrcData = new char[SzFile + 1];
   SrcFile.Read(SrcData, SzFile);
   SrcData[SzFile] = 0;

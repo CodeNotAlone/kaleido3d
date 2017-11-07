@@ -1,11 +1,6 @@
-#include "Kaleido3D.h"
-#include "Core/App.h"
-#include "Core/Os.h"
-#include "Core/Window.h"
-#include "Core/Message.h"
-#include "Core/LogUtil.h"
+#include "CoreMinimal.h"
+#include "Base/Platform.h"
 #include <queue>
-#include <Config/OSHeaders.h>
 
 namespace k3d
 {
@@ -23,25 +18,25 @@ namespace k3d
             String FileName(512);
             GetModuleFileNameA(NULL, (LPSTR)FileName.Data(), 512);
             FileName.ReCalculate();
-            auto Pos = FileName.FindLastOf('.');
-            auto BeginPos = FileName.FindLastOf('\\');
+            auto Pos = FileName.FindLastOf(".");
+            auto BeginPos = FileName.FindLastOf("\\");
             InstanceName = FileName.SubStr(BeginPos + 1, Pos - BeginPos - 1);
             ExecutableDir = FileName.SubStr(0, BeginPos);
             
 
             WIN32_FIND_DATAA ffd;
-            HANDLE hFind = FindFirstFileA(Os::Path::Join(ExecutableDir, "Data").CStr(), &ffd);
+            HANDLE hFind = FindFirstFileA(os::Join(ExecutableDir, "Data").CStr(), &ffd);
             String CurrentPath = ExecutableDir;
             while (INVALID_HANDLE_VALUE == hFind)
             {
-                auto NewPos = CurrentPath.FindLastOf('\\');
+                auto NewPos = CurrentPath.FindLastOf("\\");
                 if (NewPos == String::npos)
                 {
                     DataDir = ".";
                     break;
                 }
                 CurrentPath = CurrentPath.SubStr(0, NewPos);
-                String FindPath = Os::Path::Join(CurrentPath, "Data");
+                String FindPath = os::Join(CurrentPath, "Data");
                 hFind = FindFirstFileA(FindPath.CStr(), &ffd);
                 if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
                     DataDir = FindPath;
@@ -94,14 +89,14 @@ namespace k3d
 			}
 
 
-			uint32 Width() const override
+			U32 Width() const override
 			{
 				RECT rect;
 				::GetWindowRect(handle, &rect);
 				return rect.right - rect.left;
 			}
 
-			uint32 Height() const override
+			U32 Height() const override
 			{
 				RECT rect;
 				::GetWindowRect(handle, &rect);
@@ -123,7 +118,7 @@ namespace k3d
 			bool		PopMessage(Message & message, bool block);
 			void		ProcessMessage();
 
-			static LRESULT CALLBACK WindowProc(HWND hwnd, UINT32 msg, WPARAM wParam, LPARAM lParam);
+			static LRESULT CALLBACK WindowProc(HWND hwnd, U32 msg, WPARAM wParam, LPARAM lParam);
 
 		protected:
 			void		RegisterWindowClass();
@@ -256,7 +251,7 @@ namespace k3d
 			return Keyboard::Unknown;
 		}
 
-		LRESULT WindowsWindow::WindowProc(HWND hwnd, UINT32 msg, WPARAM wParam, LPARAM lParam)
+		LRESULT WindowsWindow::WindowProc(HWND hwnd, U32 msg, WPARAM wParam, LPARAM lParam)
 		{
 			if (msg == WM_CREATE)
 			{
@@ -559,13 +554,13 @@ namespace k3d
 			{
 				// Mouse position is in screen coordinates, convert it to window coordinates
 				POINT position;
-				position.x = static_cast<int16>(LOWORD(lParam));
-				position.y = static_cast<int16>(HIWORD(lParam));
+				position.x = static_cast<I16>(LOWORD(lParam));
+				position.y = static_cast<I16>(HIWORD(lParam));
 				::ScreenToClient(handle, &position);
 
 				Message event;
 				event.type = Message::MouseWheelMoved;
-				event.mouseWheel.delta = static_cast<int16>(HIWORD(wParam)) / 120;
+				event.mouseWheel.delta = static_cast<I16>(HIWORD(wParam)) / 120;
 				event.mouseWheel.x = position.x;
 				event.mouseWheel.y = position.y;
 				PushMessage(event);
@@ -578,8 +573,8 @@ namespace k3d
 				Message event;
 				event.type = Message::MouseButtonPressed;
 				event.mouseButton.button = Mouse::Left;
-				event.mouseButton.x = static_cast<int16>(LOWORD(lParam));
-				event.mouseButton.y = static_cast<int16>(HIWORD(lParam));
+				event.mouseButton.x = static_cast<I16>(LOWORD(lParam));
+				event.mouseButton.y = static_cast<I16>(HIWORD(lParam));
 				PushMessage(event);
 				break;
 			}
@@ -590,8 +585,8 @@ namespace k3d
 				Message event;
 				event.type = Message::MouseButtonReleased;
 				event.mouseButton.button = Mouse::Left;
-				event.mouseButton.x = static_cast<int16>(LOWORD(lParam));
-				event.mouseButton.y = static_cast<int16>(HIWORD(lParam));
+				event.mouseButton.x = static_cast<I16>(LOWORD(lParam));
+				event.mouseButton.y = static_cast<I16>(HIWORD(lParam));
 				PushMessage(event);
 				break;
 			}
@@ -602,8 +597,8 @@ namespace k3d
 				Message event;
 				event.type = Message::MouseButtonPressed;
 				event.mouseButton.button = Mouse::Right;
-				event.mouseButton.x = static_cast<int16>(LOWORD(lParam));
-				event.mouseButton.y = static_cast<int16>(HIWORD(lParam));
+				event.mouseButton.x = static_cast<I16>(LOWORD(lParam));
+				event.mouseButton.y = static_cast<I16>(HIWORD(lParam));
 				PushMessage(event);
 				break;
 			}
@@ -614,8 +609,8 @@ namespace k3d
 				Message event;
 				event.type = Message::MouseButtonReleased;
 				event.mouseButton.button = Mouse::Right;
-				event.mouseButton.x = static_cast<int16>(LOWORD(lParam));
-				event.mouseButton.y = static_cast<int16>(HIWORD(lParam));
+				event.mouseButton.x = static_cast<I16>(LOWORD(lParam));
+				event.mouseButton.y = static_cast<I16>(HIWORD(lParam));
 				PushMessage(event);
 				break;
 			}
@@ -626,8 +621,8 @@ namespace k3d
 				Message event;
 				event.type = Message::MouseButtonPressed;
 				event.mouseButton.button = Mouse::Middle;
-				event.mouseButton.x = static_cast<int16>(LOWORD(lParam));
-				event.mouseButton.y = static_cast<int16>(HIWORD(lParam));
+				event.mouseButton.x = static_cast<I16>(LOWORD(lParam));
+				event.mouseButton.y = static_cast<I16>(HIWORD(lParam));
 				PushMessage(event);
 				break;
 			}
@@ -638,8 +633,8 @@ namespace k3d
 				Message event;
 				event.type = Message::MouseButtonReleased;
 				event.mouseButton.button = Mouse::Middle;
-				event.mouseButton.x = static_cast<int16>(LOWORD(lParam));
-				event.mouseButton.y = static_cast<int16>(HIWORD(lParam));
+				event.mouseButton.x = static_cast<I16>(LOWORD(lParam));
+				event.mouseButton.y = static_cast<I16>(HIWORD(lParam));
 				PushMessage(event);
 				break;
 			}
@@ -650,8 +645,8 @@ namespace k3d
 				Message event;
 				event.type = Message::MouseButtonPressed;
 				event.mouseButton.button = HIWORD(wParam) == XBUTTON1 ? Mouse::XButton1 : Mouse::XButton2;
-				event.mouseButton.x = static_cast<int16>(LOWORD(lParam));
-				event.mouseButton.y = static_cast<int16>(HIWORD(lParam));
+				event.mouseButton.x = static_cast<I16>(LOWORD(lParam));
+				event.mouseButton.y = static_cast<I16>(HIWORD(lParam));
 				PushMessage(event);
 				break;
 			}
@@ -662,8 +657,8 @@ namespace k3d
 				Message event;
 				event.type = Message::MouseButtonReleased;
 				event.mouseButton.button = HIWORD(wParam) == XBUTTON1 ? Mouse::XButton1 : Mouse::XButton2;
-				event.mouseButton.x = static_cast<int16>(LOWORD(lParam));
-				event.mouseButton.y = static_cast<int16>(HIWORD(lParam));
+				event.mouseButton.x = static_cast<I16>(LOWORD(lParam));
+				event.mouseButton.y = static_cast<I16>(HIWORD(lParam));
 				PushMessage(event);
 				break;
 			}
@@ -672,8 +667,8 @@ namespace k3d
 			case WM_MOUSEMOVE:
 			{
 				// Extract the mouse local coordinates
-				int x = static_cast<int16>(LOWORD(lParam));
-				int y = static_cast<int16>(HIWORD(lParam));
+				int x = static_cast<I16>(LOWORD(lParam));
+				int y = static_cast<I16>(HIWORD(lParam));
 
 				// Get the client area of the window
 				RECT area;

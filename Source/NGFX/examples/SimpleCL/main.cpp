@@ -1,9 +1,8 @@
 /*
 SimpleCL SPIRV & OpenCL
 */
-#include <Kaleido3D.h>
+#include <Core/CoreMinimal.h>
 #include <ngfx.h>
-#include <Core/Os.h>
 
 #if _WIN32
 #pragma comment(linker,"/subsystem:console")
@@ -13,8 +12,8 @@ using namespace ngfx;
 
 void LoadSpv(const char * filePath, void ** ppData, uint32_t * dataSize)
 {
-  Os::File file(filePath);
-  file.Open(IOFlag::IORead);
+  k3d::os::File file(filePath);
+  file.Open(k3d::IOFlag::Read);
   *dataSize = file.GetSize();
   char* data = new char[*dataSize];
   file.Read(data, *dataSize);

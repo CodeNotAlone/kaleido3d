@@ -11,7 +11,7 @@ include_directories(
 macro(add_core_unittest TARGET_NAME)
     if(ANDROID)
         add_android_app(${TARGET_NAME}
-            SRCS ${ARGN} ${Kaleido3D_SOURCE_DIR}/Platform/Android/jni/RendererView.cpp ${Kaleido3D_SOURCE_DIR}/Source/Platform/Android/jni/RendererView_JNI.cpp
+            SRCS ${ARGN} ${Kaleido3D_SOURCE_DIR}/Source/Platform/Android/jni/RendererView.cpp ${Kaleido3D_SOURCE_DIR}/Source/Platform/Android/jni/RendererView_JNI.cpp
             LIBS ${PLATFORM_LIBS} Kaleido3D.Core)
     elseif(WIN32)
         add_executable(${TARGET_NAME} ${ARGN} ${Kaleido3D_SOURCE_DIR}/Source/Platform/Microsoft/Win32/win32icon.rc)
@@ -38,49 +38,9 @@ macro(add_core_unittest TARGET_NAME)
     set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "Unit Test/Core")
 endmacro()
 
-
 add_core_unittest(
-	Core-UnitTest-1.Os
-	UTCore.Os.cpp
+    GTestCore
+    GTestCore.cpp
 )
 
-add_core_unittest(
-	Core-UnitTest-2.WebSocket
-	UTCore.WebSocket.cpp
-)
-
-add_core_unittest(
-	Core-UnitTest-3.SharedPtr
-	UTKTL.SharedPtr.cpp
-)
-
-
-add_core_unittest(
-	Core-UnitTest-4.String
-	UTCore.String.cpp
-)
-
-add_core_unittest(
-	Core-UnitTest-5.DynArray
-	UTKTL.DynArray.cpp
-)
-
-add_core_unittest(
-	Core-UnitTest-6.RuntimeClass
-	UTCore.RuntimeClass.cpp
-)
-
-add_core_unittest(
-	Core-UnitTest-7.HashMap
-	UTKTL.HashMap.cpp
-)
-
-add_core_unittest(
-	Core-UnitTest-8.Functional
-	UTKTL.Functional.cpp
-)
-
-add_core_unittest(
-	Core-UnitTest-9.Math
-	UTCore.Math.cpp
-)
+target_link_libraries(GTestCore ${GTEST_LIBRARIES})

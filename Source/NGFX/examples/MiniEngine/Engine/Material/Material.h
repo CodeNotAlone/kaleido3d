@@ -1,7 +1,6 @@
 #pragma once
 
 #include <unordered_map>
-#include <Math/kGeometry.hpp>
 
 namespace k3d
 {
@@ -38,7 +37,7 @@ namespace k3d
 
     class MaterialRenderProxy;
 
-    class K3D_API Material
+    class K3D_CORE_API Material
     {
     public:
         Material();
@@ -46,7 +45,7 @@ namespace k3d
 
         virtual void SetTextureParam(String const& name, ngfx::Ptr<ngfx::Texture> texture);
         virtual void SetConstantParam(String const& name, float constant);
-        virtual void SetVectorParam(String const& name, kMath::Vec3f const& vec3);
+        virtual void SetVectorParam(String const& name, k3d::math::Vec3f const& vec3);
         
         virtual MaterialRenderProxy* CreateRenderProxy();
 

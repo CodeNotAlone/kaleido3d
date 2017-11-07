@@ -1,11 +1,11 @@
 #pragma once
-#include <KTL/DynArray.hpp>
-K3D_COMMON_NS
+
+namespace k3d
 {
 class Field;
 class Method;
 
-class K3D_API Class
+class K3D_CORE_API Class
 {
 public:
     Class(String Name);
@@ -14,8 +14,8 @@ public:
     Method* FindMethod(const char* Name, const char* Signature);
     Field*  FindField(const char* Name, const char* Signature);
 
-    uint32 GetNumFields() const;
-    uint32 GetNumMethods() const;
+    U32 GetNumFields() const;
+    U32 GetNumMethods() const;
 
     bool RegisterMethod(const char* MethodName, const char* Signature);
     bool RegisterField(const char* MethodName, const char* Signature, int InternalOffset);

@@ -1592,7 +1592,7 @@ public:
   void Rebuild() override;
 
   friend class CommandContext;
-
+  friend class DeviceImpl;
 private:
   VkComputePipelineCreateInfo m_ComputeCreateInfo;
   PipelineLayoutImpl* m_PipelineLayout;

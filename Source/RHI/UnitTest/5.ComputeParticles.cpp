@@ -3,8 +3,8 @@
 #include <Core/AssetManager.h>
 #include <Core/LogUtil.h>
 #include <Core/Message.h>
-#include <Kaleido3D.h>
-#include <Math/kMath.hpp>
+#include <Core/Kaleido3D.h>
+#include <Core/Math/kMath.hpp>
 #include <vector>
 
 using namespace k3d;

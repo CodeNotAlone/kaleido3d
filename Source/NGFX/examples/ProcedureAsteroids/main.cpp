@@ -2,13 +2,9 @@
 https://github.com/GameTechDev/asteroids_d3d12
 Apache License
 */
-#include <Kaleido3D.h>
-#include <KTL/Allocator.hpp>
-#include <Core/App.h>
-#include <Core/Os.h>
+#include <Core/CoreMinimal.h>
 #include <ngfx.h>
 #include <ngfxu.h>
-//#include "../MiniRenderer/MiniRenderer.h"
 
 #if _WIN32
 #pragma comment(linker,"/subsystem:console")

@@ -279,7 +279,7 @@ endif(ANDROID)
 macro(add_unittest EXAMPLE_NAME)
     if(ANDROID)
         add_android_app(${EXAMPLE_NAME}
-            SRCS ${ARGN} ${Kaleido3D_SOURCE_DIR}/Platform/Android/jni/RendererView.cpp ${Kaleido3D_SOURCE_DIR}/Source/Platform/Android/jni/RendererView_JNI.cpp
+            SRCS ${ARGN} ${Kaleido3D_SOURCE_DIR}/Source/Platform/Android/jni/RendererView.cpp ${Kaleido3D_SOURCE_DIR}/Source/Platform/Android/jni/RendererView_JNI.cpp
             LIBS ${UT_LINK_LIBS})
     elseif(WIN32)
         add_executable(${EXAMPLE_NAME} ${ARGN} ${Kaleido3D_SOURCE_DIR}/Source/Platform/Microsoft/Win32/win32icon.rc)
@@ -305,3 +305,26 @@ macro(add_unittest EXAMPLE_NAME)
     endif()
     set_target_properties(${EXAMPLE_NAME} PROPERTIES FOLDER "Unit Test")
 endmacro()
+
+
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+    set(API_EXPORTS "__attribute__((visibility(\"default\")))")
+    set(API_IMPORTS " ")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+    set(API_EXPORTS "__declspec(dllexport)")
+    set(API_IMPORTS "__declspec(dllimport)")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Apple")
+    set(API_EXPORTS "__attribute__((visibility(\"default\")))")
+    set(API_IMPORTS " ")
+endif()
+
+
+function(add_lib_api TARGET LIB_TYPE)
+    string(TOUPPER "${TARGET}_API" ${TARGET}_API)
+    if("SHARED" STREQUAL "${LIB_TYPE}")
+        target_compile_definitions(${TARGET} PRIVATE "${${TARGET}_API}=${API_EXPORTS}")
+        #target_compile_definitions(${TARGET} PUBLIC "${${TARGET}_API}=${API_IMPORTS}")
+    else()
+        target_compile_definitions(${TARGET} PUBLIC "${TARGET}_API= ")
+    endif()
+endfunction()

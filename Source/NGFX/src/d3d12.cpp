@@ -1,5 +1,4 @@
-#include <Kaleido3D.h>
-#include <KTL/Allocator.hpp>
+#include <Core/CoreMinimal.h>
 #include "ngfx.h"
 
 #include <wrl/client.h>
@@ -79,22 +78,31 @@ struct GfxTrait<Texture>
     typedef ID3D12Resource NativeType;
 };
 
+template<>
+struct GfxTrait<Fence>
+{
+    typedef ID3D12Fence NativeType;
+};
+
 template <typename TGfxObj>
 struct DeviceChild : public TGfxObj
 {
     friend class DX12Device;
-protected:
+
+    typedef DeviceChild<TGfxObj> Super;
+    typedef ComPtr<typename GfxTrait<TGfxObj>::NativeType> PtrHandle;
     ComPtr<typename GfxTrait<TGfxObj>::NativeType> Handle;
 };
 
 class DX12Queue : public DeviceChild<CommandQueue>
 {
 public:
-    DX12Queue() {}
+    DX12Queue(ComPtr<ID3D12CommandQueue> pQueue, CommandQueueType QueueType);
     ~DX12Queue() override {}
     Result CreateCommandBuffer(CommandBuffer ** ppComandBuffer) override;
 private:
-    ComPtr<ID3D12CommandAllocator> Allocator;
+    CommandQueueType                Type;
+    ComPtr<ID3D12CommandAllocator>  Allocator;
 };
 
 class DX12CommandBuffer : public DeviceChild<CommandBuffer>
@@ -102,7 +110,96 @@ class DX12CommandBuffer : public DeviceChild<CommandBuffer>
 public:
     DX12CommandBuffer() {}
     ~DX12CommandBuffer() override {}
+    Result CreateRenderCommandEncoder(Drawable * pDrawable, RenderPass * pRenderPass, RenderCommandEncoder ** ppRenderCommandEncoder) override;
+    Result CreateComputeCommandEncoder(ComputeCommandEncoder ** ppComputeCommandEncoder) override;
+    Result CreateCopyCommandEncoder(CopyCommandEncoder ** ppCopyCommandEncoder) override;
+    Result CreateParallelCommandEncoder(ParallelRenderCommandEncoder ** ppCopyCommandEncoder) override;
+    void Commit(Fence * pFence) override;
+private:
+
 };
+
+template <typename TEncoder>
+struct CmdTrait
+{
+    typedef ID3D12CommandList Type;
+};
+
+template<>
+struct CmdTrait<RenderCommandEncoder>
+{
+    typedef ID3D12GraphicsCommandList Type;
+};
+
+template<typename TEncoder>
+class CmdEncoder : public TEncoder
+{
+public:
+    typedef ComPtr<typename CmdTrait<TEncoder>::Type> PtrCmdList;
+
+    PtrCmdList CmdList;
+
+    virtual void Barrier(Resource * pResource);
+    virtual void SetPipeline(Pipeline* pPipelineState);
+    virtual void SetBindTable(BindTable * pBindingTable);
+    virtual void EndEncode();
+};
+
+class DX12RenderEncoder : public CmdEncoder<RenderCommandEncoder>
+{
+public:
+
+};
+
+class DX12ComputeEncoder : public CmdEncoder<ComputeCommandEncoder>
+{
+
+};
+
+class DX12CopyEncoder : public CmdEncoder<CopyCommandEncoder>
+{
+
+};
+
+class DX12BundleEncoder : public CmdEncoder<ParallelRenderCommandEncoder>
+{
+
+};
+
+class DX12Fence : public DeviceChild<Fence>
+{
+public:
+    DX12Fence(Super::PtrHandle pHandle);
+    ~DX12Fence();
+    void Wait() override;
+    void Reset() override;
+};
+
+Result DX12CommandBuffer::CreateRenderCommandEncoder(Drawable * pDrawable, RenderPass * pRenderPass, RenderCommandEncoder ** ppRenderCommandEncoder)
+{
+    return Result::Ok;
+}
+
+Result DX12CommandBuffer::CreateComputeCommandEncoder(ComputeCommandEncoder ** ppComputeCommandEncoder)
+{
+    return Result::Ok;
+}
+
+Result DX12CommandBuffer::CreateCopyCommandEncoder(CopyCommandEncoder ** ppCopyCommandEncoder)
+{
+    return Result::Ok;
+}
+
+Result DX12CommandBuffer::CreateParallelCommandEncoder(ParallelRenderCommandEncoder ** ppCopyCommandEncoder)
+{
+    return Result::Ok;
+}
+
+void DX12CommandBuffer::Commit(Fence * pFence)
+{
+//    GetQueue()->ExecuteCommandLists(1, List);
+//    GetQueue()->Signal(pDXFence, NextValue);
+}
 
 class DX12Device : public Device
 {
@@ -129,6 +226,7 @@ public:
 
 private:
     ComPtr<ID3D12Device> Handle;
+    DeviceDesc           Desc;
 };
 
 namespace ngfx
@@ -215,7 +313,29 @@ namespace ngfx
 
 void DX12Device::GetDesc(DeviceDesc * pDesc)
 {
+    memcpy(pDesc, &Desc, sizeof(Desc));
+}
 
+DX12Queue::DX12Queue(ComPtr<ID3D12CommandQueue> pQueue, CommandQueueType QueueType)
+    : Type(QueueType)
+{
+    Super::Handle = pQueue;
+    D3D12_COMMAND_LIST_TYPE ListType = D3D12_COMMAND_LIST_TYPE_BUNDLE;
+    switch (Type)
+    {
+    case CommandQueueType::Graphics:
+        ListType = D3D12_COMMAND_LIST_TYPE_DIRECT;
+        break;
+    case CommandQueueType::Compute:
+        ListType = D3D12_COMMAND_LIST_TYPE_COMPUTE;
+        break;
+    case CommandQueueType::Copy:
+        ListType = D3D12_COMMAND_LIST_TYPE_COPY;
+        break;
+    }
+    ComPtr<ID3D12Device> Device;
+    Handle->GetDevice(IID_PPV_ARGS(Device.GetAddressOf()));
+    Device->CreateCommandAllocator(ListType, IID_PPV_ARGS(Allocator.GetAddressOf()));
 }
 
 Result DX12Queue::CreateCommandBuffer(CommandBuffer ** ppComandBuffer)
@@ -223,11 +343,14 @@ Result DX12Queue::CreateCommandBuffer(CommandBuffer ** ppComandBuffer)
     ComPtr<ID3D12Device> Device;
     Handle->GetDevice(IID_PPV_ARGS(Device.GetAddressOf()));
     //Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, nullptr, nullptr, IID_PPV_ARGS());
+    
     return Result::Ok;
 }
 
-Result DX12Device::CreateCommandQueue(CommandQueueType queueType, CommandQueue ** pQueue)
+Result DX12Device::CreateCommandQueue(CommandQueueType queueType, CommandQueue ** ppQueue)
 {
+    if (!ppQueue)
+        return Result::ParamError;
     D3D12_COMMAND_QUEUE_DESC desc = {};
     switch (queueType)
     {
@@ -246,6 +369,8 @@ Result DX12Device::CreateCommandQueue(CommandQueueType queueType, CommandQueue *
     HRESULT ret = Handle->CreateCommandQueue(&desc, IID_PPV_ARGS(queue.GetAddressOf()));
     if (SUCCEEDED(ret))
     {
+        auto pQueue = new DX12Queue(queue, queueType);
+        *ppQueue = pQueue;
         return Result::Ok;
     }
     return Result::Failed;
@@ -308,7 +433,34 @@ Result DX12Device::CreateTexture(const TextureDesc * desc, Texture ** pTexture)
 
 Result DX12Device::CreateFence(Fence ** ppFence)
 {
+    if (!ppFence)
+        return Result::ParamError;
+    ComPtr<ID3D12Fence> pFence;
+    HRESULT Ret = Handle->CreateFence(0, D3D12_FENCE_FLAGS::D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(pFence.GetAddressOf()));
+    if (FAILED(Ret))
+    {
+        return Result::Failed;
+    }
+    *ppFence = new DX12Fence(pFence);
     return Result::Ok;
+}
+
+DX12Fence::DX12Fence(Super::PtrHandle pHandle)
+{
+    Handle = pHandle;
+}
+
+DX12Fence::~DX12Fence()
+{}
+
+void DX12Fence::Wait()
+{
+
+}
+
+void DX12Fence::Reset()
+{
+
 }
 
 void DX12Device::WaitIdle()

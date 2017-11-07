@@ -20,7 +20,7 @@ public:
 
 typedef ::k3d::DynArray<TextQuad> TextQuads;
 
-class K3D_API FontManager
+class K3D_CORE_API FontManager
 {
 public:
   FontManager();

@@ -1,5 +1,5 @@
-#include "Kaleido3D.h"
-#include <KTL/Allocator.hpp>
+#include <Core/CoreMinimal.h>
+
 #include "vulkan_glslang.h"
 using namespace ngfx;
 
@@ -8,10 +8,6 @@ using namespace ngfx;
 #include <spirv-tools/optimizer.hpp>
 
 using namespace glslang;
-
-#include <Kaleido3D.h>
-#include <Core/Os.h>
-#include <KTL/Archive.hpp>
 
 EShLanguage ConvertShaderTypeToGlslangEnum(ngfx::ShaderType const& e) {
   switch (e) {
@@ -258,8 +254,8 @@ struct EntryInfo
 ngfx::Result SerializeLibrary(const FunctionMap& Data, const char* Path)
 {
   if (Data.empty()) return Result::Failed;
-  Os::File OutputLib(Path);
-  OutputLib.Open(IOWrite);
+  k3d::os::File OutputLib(Path);
+  OutputLib.Open(k3d::IOFlag::Write);
   k3d::Archive ArchLib;
   ArchLib.SetIODevice(&OutputLib);
   ArchLib.ArrayIn("VKBC", 4);

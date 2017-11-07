@@ -741,11 +741,11 @@ struct RefCounted
   virtual ~RefCounted() {}
   int32_t AddInternalRef()
   {
-    return __k3d_intrinsics__::AtomicIncrement(&m_IntRef);
+    return __intrinsics__::AtomicIncrement(&m_IntRef);
   }
   int32_t ReleaseInternal()
   {
-    auto c = __k3d_intrinsics__::AtomicDecrement(&m_IntRef);
+    auto c = __intrinsics__::AtomicDecrement(&m_IntRef);
     if (m_IntRef == 0)
     {
       delete this;
@@ -754,7 +754,7 @@ struct RefCounted
   }
   int32_t Release()
   {
-    auto c = __k3d_intrinsics__::AtomicDecrement(&m_ExtRef);
+    auto c = __intrinsics__::AtomicDecrement(&m_ExtRef);
     if (m_ExtRef == 0)
     {
       ReleaseInternal();
@@ -763,7 +763,7 @@ struct RefCounted
   }
   int32_t AddRef()
   {
-    return __k3d_intrinsics__::AtomicIncrement(&m_ExtRef);
+    return __intrinsics__::AtomicIncrement(&m_ExtRef);
   }
 private:
   int32_t m_IntRef = 1;
@@ -816,7 +816,7 @@ struct NamedObject : public RefCounted<ThreadSafe>
 protected:
   void operator delete (void * Ptr)
   {
-    __k3d_free__(Ptr, 0);
+    k3d_free(Ptr, 0);
   }
 };
 template <class NGFXObj>

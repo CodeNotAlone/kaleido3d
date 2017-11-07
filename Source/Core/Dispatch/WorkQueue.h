@@ -12,7 +12,7 @@ using String = k3d::String;
 class WorkItem;
 class WorkGroup;
 
-class K3D_API WorkQueue : public ::Os::Thread
+class K3D_CORE_API WorkQueue : public ::Os::Thread
 {
 public:
   typedef WorkItem* PtrWorkItem;

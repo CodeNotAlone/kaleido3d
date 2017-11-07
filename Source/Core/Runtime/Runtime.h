@@ -1,12 +1,13 @@
 #pragma once
-#include <KTL/String.hpp>
+
 #include "Object.h"
-K3D_COMMON_NS
+
+namespace k3d
 {
 class Class;
 class Method;
 
-class K3D_API StackData
+class K3D_CORE_API StackData
 {
 public:
     StackData();
@@ -28,14 +29,14 @@ public:
     }
 
 private:
-    uint64 m_CurOffset;
-    uint64 m_StackSize;
-    uint8* m_Data;
+    U64 m_CurOffset;
+    U64 m_StackSize;
+    U8* m_Data;
 };
 
 typedef void (IObject::*NativeFunc)(StackData& Data);
 
-class K3D_API Runtime
+class K3D_CORE_API Runtime
 {
 public:
     Runtime();

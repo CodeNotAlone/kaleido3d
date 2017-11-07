@@ -2532,7 +2532,7 @@ void RenderPassImpl::Begin(VkCommandBuffer Cmd, FrameBufferRef pFramebuffer, NGF
     VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO, nullptr,
     m_NativeObj, pFramebuffer->NativeHandle(),
     RenderArea,
-    pFramebuffer->m_HasDepthStencil ? 2 : 1, // uint32_t               clearValueCount;
+    (pFramebuffer->m_HasDepthStencil ? 2 : 1), // uint32_t               clearValueCount;
     m_ClearVal               // const VkClearValue*    pClearValues;
   };
   if (pFramebuffer->m_HasDepthStencil)

@@ -1,8 +1,8 @@
 #pragma once
 #include "Runtime.h"
-K3D_COMMON_NS
+namespace k3d
 {
-class K3D_API Field
+class K3D_CORE_API Field
 {
 public:
     Field(String Name, int InternalOffset);

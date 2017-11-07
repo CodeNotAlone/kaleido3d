@@ -13,7 +13,7 @@
 #endif
 #include <vulkan/vulkan.h>
 #include <stdlib.h>
-#include <KTL/SharedPtr.hpp>
+#include <Core/KTL/SharedPtr.hpp>
 
 #ifdef VK_NO_PROTOTYPES
 
@@ -31,7 +31,7 @@
 
 #define _VK_GET_DEVICE_POINTER_(device, funcName) vk##funcName = (PFN_vk##funcName)vkGetDeviceProcAddr(device, "vk" K3D_STRINGIFY(funcName));
 #define _DEF_VK_FUNC_(funcName) PFN_vk##funcName vk##funcName = NULL
-#define _PREDEF_VK_FUNC_(funcName) extern K3D_API PFN_vk##funcName vk##funcName
+#define _PREDEF_VK_FUNC_(funcName) extern K3D_CORE_API PFN_vk##funcName vk##funcName
 
 #if K3DPLATFORM_OS_WIN
 #undef CreateSemaphore

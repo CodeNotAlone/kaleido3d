@@ -1,8 +1,8 @@
 #pragma once
 #include "Runtime.h"
-K3D_COMMON_NS
+namespace k3d
 {
-class K3D_API Method
+class K3D_CORE_API Method
 {
 public:
     Method(String Name, int InternalOffset);

@@ -14,7 +14,7 @@ namespace k3d
 		uint32 BoneIDs[4];
 	};
 
-	class K3D_API RiggedMeshData
+	class K3D_CORE_API RiggedMeshData
 	{
 	public:
 		RiggedMeshData();

@@ -22,7 +22,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore") # UWP Windows
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows") # Win32
     if(NOT ANDROID)
         add_definitions(-DK3DPLATFORM_OS_WIN=1)
-        set(K3D_TARGET_SYSTEM "Window")
+        set(K3D_TARGET_SYSTEM "Windows")
     else()
         add_definitions(-DK3DPLATFORM_OS_ANDROID=1)
         set(K3D_TARGET_SYSTEM "Android")

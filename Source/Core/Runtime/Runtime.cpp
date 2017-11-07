@@ -1,11 +1,11 @@
-#include "Kaleido3D.h"
+#include "CoreMinimal.h"
 #include "Runtime.h"
 #include "Class.h"
 #include "Enum.h"
 #include "Field.h"
 #include "Method.h"
 
-K3D_COMMON_NS
+namespace k3d
 {
 StackData::StackData() : m_CurOffset(0)
 {
@@ -40,13 +40,13 @@ Class::FindMethod(const char* Name, const char* Signature)
 {
     return nullptr;
 }
-uint32 Class::GetNumFields() const
+U32 Class::GetNumFields() const
 {
-    return m_Fields.Count();
+    return (U32)m_Fields.Count();
 }
-uint32 Class::GetNumMethods()const
+U32 Class::GetNumMethods()const
 {
-    return m_Methods.Count();
+    return (U32)m_Methods.Count();
 }
 bool Class::RegisterMethod(const char *MethodName, const char *Signature)
 {

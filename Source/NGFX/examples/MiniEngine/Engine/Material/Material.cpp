@@ -21,7 +21,7 @@ namespace k3d
 
     }
 
-    void Material::SetVectorParam(String const & name, kMath::Vec3f const & vec3)
+    void Material::SetVectorParam(String const & name, k3d::math::Vec3f const & vec3)
     {
     }
 

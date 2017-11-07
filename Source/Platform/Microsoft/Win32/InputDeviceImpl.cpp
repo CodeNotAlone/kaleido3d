@@ -1,6 +1,6 @@
-#include "Kaleido3D.h"
+#include "CoreMinimal.h"
 #include "InputDeviceImpl.h"
-
+#include "Base/Platform.h"
 namespace k3d
 {
 	namespace InputDeviceImpl

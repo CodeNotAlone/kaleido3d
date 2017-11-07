@@ -1,7 +1,7 @@
 #include <clang-c/Index.h>
-#include "Kaleido3D.h"
-#include <KTL/String.hpp>
-#include <KTL/DynArray.hpp>
+#include <Core/Kaleido3D.h>
+#include <Core/KTL/String.hpp>
+#include <Core/KTL/DynArray.hpp>
 #include <Core/LogUtil.h>
 #include "Reflector.h"
 
@@ -14,7 +14,6 @@ namespace k3d
         clang_disposeString(str);
         return _Str;
     }
-
 
     String GetFullName(CXCursor cursor)
     {
@@ -36,8 +35,9 @@ namespace k3d
         return name;
     }
 
-    Cursor::Cursor(const CXCursor & c)
+    Cursor::Cursor(const CXCursor & c, CursorType _Type)
         : m_Handle(c)
+        , Type(_Type)
     {
     }
 
@@ -58,6 +58,11 @@ namespace k3d
         return cxStr(clang_getCursorDisplayName(m_Handle));
     }
 
+    String Cursor::GetFullTypeName()
+    {
+        return GetFullName(m_Handle);
+    }
+
     Cursor::List Cursor::GetChildren()
     {
         Cursor::List list;
@@ -66,6 +71,7 @@ namespace k3d
         {
             auto name = GetFullName(cursor);
             auto kind = clang_getCursorKind(cursor);
+            Cursor::List* _List = reinterpret_cast<Cursor::List*>(data);
             switch (kind)
             {
             case CXCursor_EnumDecl:
@@ -73,6 +79,7 @@ namespace k3d
                 clang_visitChildren(cursor, VisitAnnotation, nullptr);
                 break;
             case CXCursor_ClassDecl:
+            case CXCursor_TypedefDecl:
             case CXCursor_StructDecl:
             {
                 String annotate = cxStr(clang_getCursorUSR(cursor));
@@ -84,17 +91,23 @@ namespace k3d
                 {
                     KLOG(Info, Class, "ClassName: %s.", name.CStr());
                 }
+                _List->Append(Cursor(cursor, CursorType::Class));
                 clang_visitChildren(cursor, VisitAnnotation, nullptr);
                 break;
             }
-            case CXCursor_CXXMethod:
+            //case CXCursor_CXXMethod:
             case CXCursor_FunctionDecl:
                 KLOG(Info, Function, "FunctionName: %s.", name.CStr());
+                _List->Append(Cursor(cursor, CursorType::Function));
                 clang_visitChildren(cursor, VisitAnnotation, nullptr);
                 break;
             case CXCursor_FieldDecl:
                 KLOG(Info, Field, "FieldName: %s.", name.CStr());
                 clang_visitChildren(cursor, VisitAnnotation, nullptr);
+                break;
+            case CXCursor_MacroDefinition:
+                KLOG(Info, Define, "DefineName: %s.", name.CStr());
+                _List->Append(Cursor(cursor, CursorType::MacroDefinition));
                 break;
             default:
                 break;
@@ -106,5 +119,51 @@ namespace k3d
         return list;
     }
 
+    Parser::Parser(const char* FileName, const char* _argv[], int argc)
+    {
+        ParIndex = clang_createIndex(0, 0);
+        ParUnit = clang_parseTranslationUnit(
+            ParIndex,
+            FileName, _argv, argc - 3,
+            nullptr, 0,
+            CXTranslationUnit_None);
+    }
 
+    Parser::~Parser()
+    {
+        clang_disposeTranslationUnit(ParUnit);
+        clang_disposeIndex(ParIndex);
+    }
+
+    void Parser::DoParse()
+    {
+        if (ParUnit == nullptr)
+        {
+            KLOG(Fatal, CppReflector, "Unable to parse translation unit. Quitting.");
+            return;
+        }
+        k3d::Cursor cur(clang_getTranslationUnitCursor(ParUnit));
+        DumpFile.Open("Dump.txt", IOWrite);
+        for (auto Child : cur.GetChildren())
+        {
+            auto CurName = Child.GetFullTypeName();
+            String Data;
+            switch (Child.GetType())
+            {
+            case CursorType::Class:
+                Data += "C ";
+                break;
+
+            case CursorType::Function:
+                Data += "F ";
+                break;
+            case CursorType::MacroDefinition:
+                Data += "D ";
+                break;
+            } 
+            Data += CurName + "\r\n";
+            DumpFile.Write(*Data, Data.Length());
+        }
+        DumpFile.Close();
+    }
 }

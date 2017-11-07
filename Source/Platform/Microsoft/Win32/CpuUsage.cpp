@@ -1,9 +1,6 @@
-#include "Kaleido3D.h"
-#include <Core/Os.h>
-
+#include "CoreMinimal.h"
 
 #include <errno.h>
-#include <ntstatus.h>
 #define WIN32_NO_STATUS
 #include <windows.h>
 #include <WbemCli.h>
@@ -175,6 +172,15 @@ namespace GPUPerf
       inited = true;
     }
 
+    int GetGpuCount()
+    {
+        if (!inited)
+        {
+            Init();
+        }
+        return NvGpuCount;
+    }
+
     float GetGpuUsage(int Id)
     {
       if(!inited)
@@ -193,7 +199,9 @@ namespace GPUPerf
 }
 
 
-namespace Os
+namespace k3d
+{
+namespace os
 {
 float* GetCpuUsage()
 {
@@ -204,14 +212,15 @@ float* GetCpuUsage()
 	return __GetCpuUsage();
 }
 
-uint32
+U32
 GetGpuCount()
 {
-  return GPUPerf::NV::NvGpuCount;
+  return GPUPerf::NV::GetGpuCount();
 }
 
 float GetGpuUsage(int Id)
 {
   return GPUPerf::NV::GetGpuUsage(Id);
+}
 }
 }

@@ -1,12 +1,6 @@
 #pragma once
 
-#include <Kaleido3D.h>
-
-// Templ Lib
-#include <KTL/String.hpp>
-#include <KTL/Functional.hpp>
-#include <KTL/SharedPtr.hpp>
-#include <Core/App.h>
+#include <Core/CoreMinimal.h>
 
 // NGFX LIb
 #include <ngfx.h>
@@ -22,7 +16,7 @@ namespace k3d
      * Kick Renderer
      * Asset Loading
      */
-    class K3D_API EngineBase
+    class K3D_CORE_API EngineBase
     {
     public:
 
@@ -50,6 +44,6 @@ namespace k3d
 
     };
 
-    extern K3D_API Renderer& GetRenderer();
+    extern K3D_CORE_API Renderer& GetRenderer();
 
 }

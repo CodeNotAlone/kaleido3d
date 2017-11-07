@@ -1,8 +1,8 @@
-#include <Kaleido3D.h>
+#include <Core/Kaleido3D.h>
 #include <Core/Os.h>
 #include <Core/Module.h>
 #include <Core/LogUtil.h>
-#include <Interface/ICrossShaderCompiler.h>
+#include <Core/Interface/ICrossShaderCompiler.h>
 #include <iostream>
 
 #if K3DPLATFORM_OS_WIN

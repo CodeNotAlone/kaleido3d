@@ -1,5 +1,4 @@
-#include "Kaleido3D.h"
-#include <KTL/Allocator.hpp>
+#include <Core/CoreMinimal.h>
 #include "ngfxu.h"
 
 using namespace ngfx;

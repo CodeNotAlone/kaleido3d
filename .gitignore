@@ -1,8 +1,13 @@
+*.classpath
+*.project
+*.settings/
 # Compiled Object files
 *.slo
 *.lo
 *.o
 *.obj
+*.pyc
+*.lock
 cmake-build-debug
 Binary
 Lib

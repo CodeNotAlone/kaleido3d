@@ -1,6 +1,6 @@
 #pragma once
 
-K3D_COMMON_NS
+namespace k3d
 {
 class IObject
 {

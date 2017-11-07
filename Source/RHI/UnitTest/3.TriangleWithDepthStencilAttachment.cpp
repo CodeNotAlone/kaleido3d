@@ -1,11 +1,11 @@
-#include <Kaleido3D.h>
+#include <Core/Kaleido3D.h>
 #include <Base/UTRHIAppBase.h>
 #include <Core/App.h>
 #include <Core/AssetManager.h>
 #include <Core/LogUtil.h>
 #include <Core/Message.h>
-#include <Interface/IRHI.h>
-#include <Math/kMath.hpp>
+#include <Core/Interface/IRHI.h>
+#include <Core/Math/kMath.hpp>
 
 using namespace k3d;
 using namespace kMath;

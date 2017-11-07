@@ -1,80 +1,57 @@
-include_directories(.. ../../Include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if(UNIX)
-find_package(X11)
-include_directories(${X11_INCLUDE_DIR})
+    find_package(X11)
+    include_directories(${X11_INCLUDE_DIR})
 endif()
 
-
-set(UTIL_SRCS
-    LogUtil.h
-    LogUtil.cpp
-    Utils/MD5.h
-    Utils/MD5.cpp
-#    Utils/Base64.h
-#    Utils/Base64.cpp
-    Utils/SHA1.h
-    Utils/SHA1.cpp
-    Utils/farmhash.h
-    Utils/farmhash.cc
-    AssetManager.h 
-    AssetManager.cpp
+set(BASE_SRCS 
+    Base/Types.h
+    Base/Simd.h
+    Base/Simd.cpp
+    Base/Platform.h
+    Base/Encoder.h
+    Base/Encoder.cpp
+    Base/Log.h
+    Base/Log.cpp
+    Base/Module.h
+    Base/Module.cpp
+    Base/Version.h
+    Base/Regex.h
+    Base/Regex.cpp
+    Base/Profiler/Profiler.h
+    Base/Profiler/Profiler.cpp
+    Base/Memory/MemoryImpl.cpp
+    Base/Memory/StringImpl.cpp
+    Base/Memory/AllocatorImpl.cpp
 )
-
-source_group(Utils FILES ${UTIL_SRCS})
-set(MODULE_SRC Module.h Module.cpp)
-source_group(Module FILES ${MODULE_SRC})
-
-source_group(
-	Factory FILES
-	ReflectFactory.h
-	ReflectFactory.cpp
-)
-
-set(CONCURR_SRCS
-    Dispatch/Dispatcher.h
-    Dispatch/WorkGroup.cpp
-    Dispatch/WorkGroup.h
-    Dispatch/WorkItem.cpp
-    Dispatch/WorkItem.h
-    Dispatch/WorkQueue.cpp
-    Dispatch/WorkQueue.h
-)
-
-source_group(Concurrent FILES ${CONCURR_SRCS})
-set(CORE_SRCS 
-#${ASSET_SRCS} 
-${CONCURR_SRCS} 
-${UTIL_SRCS})
-set(MSG_SRCS Message.h InputDevice.h InputDevice.cpp)
-source_group("XPlatform\\Message" FILES ${MSG_SRCS})
-
-set(COMMON_SRCS
-    Timer.h
-    Timer.cpp
-    Os.h
-    Os.cpp
-    WebSocket.h
-    WebSocket.cpp
-    Window.h
-#    Looper.h
-#    Looper.cpp
-    App.h
-    App.cpp
-    AllocatorImpl.cpp
-    StringImpl.cpp
-)
+source_group(Base FILES ${BASE_SRCS})
 
 set(MATH_SRCS
-	Math/Noise.h
-	Math/Noise.cpp
-	Math/SH.h
-	Math/SH.cpp
-	Math/FFT.h
-	Math/FFT.cpp
+    Math/Noise.h
+    Math/Noise.cpp
+    Math/SH.h
+    Math/SH.cpp
+    Math/FFT.h
+    Math/Vector.h
+    Math/Matrix.h
+    Math/Quaterion.h
+    Math/Geometry.h
+    Math/FFT.cpp
 )
-
 source_group(Math FILES ${MATH_SRCS})
+
+set(XPLAT_SRCS
+    XPlatform/Os.h
+    XPlatform/Os.cpp
+    XPlatform/App.h
+    XPlatform/App.cpp
+    XPlatform/InputDevice.cpp
+    XPlatform/InputDevice.h
+    XPlatform/Message.h
+    XPlatform/Window.h
+)
+source_group(XPlatform FILES ${XPLAT_SRCS})
 
 set(RT_SRCS
     Runtime/Enum.h
@@ -86,8 +63,13 @@ set(RT_SRCS
 )
 source_group(Runtime FILES ${RT_SRCS})
 
-source_group(XPlatform FILES ${COMMON_SRCS})
-set(CORE_SRCS ${CORE_SRCS} ${MSG_SRCS} ${COMMON_SRCS} ${MODULE_SRC} ${RT_SRCS})
+set(NET_SRCS
+    Net/Net.h
+    Net/Net.cpp
+)
+source_group(Net FILES ${NET_SRCS})
+
+set(CORE_SRCS ${BASE_SRCS} ${XPLAT_SRCS} ${RT_SRCS} ${MATH_SRCS} ${NET_SRCS})
 
 ####################Platform Specified###################
 
@@ -96,11 +78,13 @@ if(WINUWP)
     source_group("XPlatform\\WindowsUWP" FILES ${WINDOWS_IMPL_SRCS} ${Core_RC})
     generate_win_res(Core VER "1.0.0.1" DESC "Kernel Module")
     set(CORE_SRCS ${CORE_SRCS} ${WINDOWS_IMPL_SRCS} ${Core_RC} ${MATH_SRCS})
+    list(APPEND CORE_DEP_LIBS pcre2)
 elseif(WIN32)
+    generate_win_res(Core VER "1.0.0.1" DESC "Kernel Module")
     file(GLOB WINDOWS_IMPL_SRCS "../Platform/Microsoft/Win32/*.cpp" "../Platform/Microsoft/Win32/*.h")
     source_group("XPlatform\\Windows" FILES ${WINDOWS_IMPL_SRCS} ${Core_RC})
-    generate_win_res(Core VER "1.0.0.1" DESC "Kernel Module")
     set(CORE_SRCS ${CORE_SRCS} ${WINDOWS_IMPL_SRCS} ${Core_RC} ${MATH_SRCS})
+    list(APPEND CORE_DEP_LIBS pcre2)
 elseif(ANDROID)
     file(GLOB ANDROID_SRCS "../Platform/Android/cpp/*.cpp" "../Platform/Android/cpp/*.h")
     source_group("XPlatform\\Android" FILES ${ANDROID_SRCS})
@@ -125,50 +109,15 @@ elseif(UNIX)
 endif()
 
 k3d_add_lib(Core SRCS ${CORE_SRCS} LIBS ${CORE_DEP_LIBS} FOLDER "Runtime"
-    PCH "Kaleido3D.h"
-    PCH_SRC "${Kaleido3D_ROOT_DIR}/Source/Core/App.cpp"
-    PCH_INCLUDE "${Kaleido3D_ROOT_DIR}/Include"
+    PCH "CoreMinimal.h"
+    PCH_SRC "${Kaleido3D_ROOT_DIR}/Source/Core/XPlatform/Os.cpp"
+    PCH_INCLUDE "${Kaleido3D_ROOT_DIR}/Source/Core"
 )
-
-#if(WIN32)
-#set_target_properties(Kaleido3D.Core PROPERTIES
-#LINK_FLAGS "/nodefaultlib:vcruntime.lib /nodefaultlib:msvcrt.lib"
-#)
-#endif()
 
 install(TARGETS Kaleido3D.Core 
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin)
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DESTINATION include/kaleido3d
-    FILES_MATCHING PATTERN "*.h"
-)
-
-install(FILES ${Kaleido3D_ROOT_DIR}/Include/Kaleido3D.h
-    DESTINATION include/kaleido3d
-)
-
-install(DIRECTORY ${Kaleido3D_ROOT_DIR}/Include/KTL
-    DESTINATION include/kaleido3d
-    FILES_MATCHING PATTERN "*.hpp"
-)
-
-install(DIRECTORY ${Kaleido3D_ROOT_DIR}/Include/Math
-    DESTINATION include/kaleido3d
-    FILES_MATCHING PATTERN "*.hpp"
-)
-
-install(DIRECTORY ${Kaleido3D_ROOT_DIR}/Include/Interface
-    DESTINATION include/kaleido3d
-    FILES_MATCHING PATTERN "*.h"
-)
-
-install(DIRECTORY ${Kaleido3D_ROOT_DIR}/Include/Config
-    DESTINATION include/kaleido3d
-    FILES_MATCHING PATTERN "*.h"
-)
 
 if(BUILD_WITH_UNIT_TEST)
     add_subdirectory(UnitTest)

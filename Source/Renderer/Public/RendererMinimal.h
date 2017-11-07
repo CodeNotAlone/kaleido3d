@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Interface/IRHI.h>
-#include <Math/kMath.hpp>
+#include <Core/Interface/IRHI.h>
+#include <Core/Math/kMath.hpp>
 #include <Core/Window.h>
-#include <KTL/SharedPtr.hpp>
+#include <Core/KTL/SharedPtr.hpp>
